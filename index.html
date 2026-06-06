@@ -1,27 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width-device-width, initial-scale=1.0">
-	<title>ViVeHaRa</title>
-	<link rel="stylesheet" href="style/stylesheet.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIVEHARA Technologies — Technology that moves your business forward</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vivehara-landing.css">
 </head>
-
 <body>
-	<nav class="navbar">
-		  <a href="index.html" class="logo">
-    		<img src="images/ViVeHaRa_Logo.jpg" alt="Company Logo" height="60"></a>
-		<ul>
-			<li><a href="#home">Home</a></li>
-			<li><a href="#services">About Us</a></li>
-			<li><a href="#product">Product</a></li>
-			<li><a href="#contact">Contact Us</a></li>	
-		</ul>
-	<marquee><h1>Welcome to ViVeHaRa website</h1></marquee>
-	<h3>Developed by Harish V</h3>
-	<p>We are coming soon!!!</p>
-		<p>The HTML is complete</p>
-		<p>I also completed css</p>
-		<p>I still need to complete both the training courses online</p>
+
+<!-- ===================== NAV ===================== -->
+<nav>
+  <div class="logo">
+  <div class="logo-mark">
+    <img src="images/ViVeHaRa_Logo.jpg" alt="VIVEHARA Technologies logo">
+  </div>
+    VIVEHARA Technologies <!-- EDIT: Change company name -->
+  </div>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-status"><div class="status-dot"></div>All systems operational</div>
+    <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get Started</button>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-chip"><div class="chip-dot"></div>200+ companies — 30+ countries</div> <!-- EDIT: Update badge text -->
+    <h1>Technology that <em>moves</em> your business forward</h1> <!-- EDIT: Your headline -->
+    <p class="hero-sub">Scalable software and digital infrastructure for companies ready to lead their industries — not follow.</p> <!-- EDIT: Your subheadline -->
+    <div class="hero-btns">
+      <button class="btn-p" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Explore Services</button>
+      <button class="btn-o" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">About Us →</button>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <!-- EDIT: Replace with your real metrics -->
+    <div class="panel-card">
+      <div class="panel-label">System uptime · Q2 2026</div>
+      <div class="panel-row">
+        <div class="panel-val blue">99.98%</div>
+        <div class="panel-tag green">↑ +0.03%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:99.98%"></div></div>
+    </div>
+    <div class="panel-card cyan">
+      <div class="panel-label">Avg. API response time</div>
+      <div class="panel-row">
+        <div class="panel-val cyan">&lt; 80ms</div>
+        <div class="panel-tag">p99 · 142ms</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill cyan" style="width:82%"></div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-mini"><div class="lbl">Requests/day</div><div class="val">2.4M+</div></div>
+      <div class="stat-mini"><div class="lbl">Clients</div><div class="val">200+</div></div>
+      <div class="stat-mini"><div class="lbl">Engineers</div><div class="val">48</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SERVICES ===================== -->
+<section id="services" class="section-white">
+  <div class="s-tag">// what we offer</div>
+  <div class="s-title">Our services</div>
+  <div class="s-sub">From architecture to deployment — we handle every layer of your technology stack with precision.</div>
+  <div class="svc-grid">
+    <!-- EDIT: Replace each service block with your own -->
+    <div class="svc">
+      <div class="svc-num">01</div>
+      <div class="svc-icon">⚙</div>
+      <h3>Platform Engineering</h3>
+      <p>Custom infrastructure built for resilience, scale, and your exact operational requirements.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+    <div class="svc">
+      <div class="svc-num">02</div>
+      <div class="svc-icon">◈</div>
+      <h3>AI & Automation</h3>
+      <p>Intelligent pipelines and ML integrations that reduce overhead and surface critical insights.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+    <div class="svc">
+      <div class="svc-num">03</div>
+      <div class="svc-icon">☁</div>
+      <h3>Cloud Architecture</h3>
+      <p>Multi-cloud strategies and migration plans that optimize performance and minimize cost.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+    <div class="svc">
+      <div class="svc-num">04</div>
+      <div class="svc-icon">⬡</div>
+      <h3>Cybersecurity</h3>
+      <p>End-to-end security audits, threat modeling, and compliance frameworks for peace of mind.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+    <div class="svc">
+      <div class="svc-num">05</div>
+      <div class="svc-icon">◻</div>
+      <h3>Product Development</h3>
+      <p>Web and mobile applications crafted with precision — from wireframe to launch-ready.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+    <div class="svc">
+      <div class="svc-num">06</div>
+      <div class="svc-icon">▦</div>
+      <h3>Data & Analytics</h3>
+      <p>Unified pipelines, dashboards, and reporting systems that turn raw data into decisions.</p>
+      <div class="svc-arrow">↗</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABOUT ===================== -->
+<section id="about" class="section-white">
+  <div class="about-inner">
+    <div>
+      <div class="s-tag">// who we are</div>
+      <div class="s-title">About us</div>
+      <!-- EDIT: Your company story -->
+      <p class="about-text">Founded in 2026, VIVEHARA Technologies has grown from a lean engineering consultancy into a full-stack technology partner trusted by enterprises across +1 countries.</p>
+      <p class="about-text">We believe great software isn't just built — it's engineered. Every decision is rooted in long-term thinking, not quick fixes.</p>
+      <div class="a-stats">
+        <!-- EDIT: Your real stats -->
+        <div class="a-stat"><div class="n">1yr</div><div class="l">in business</div></div>
+        <div class="a-stat"><div class="n">2+</div><div class="l">clients served</div></div>
+        <div class="a-stat"><div class="n">2</div><div class="l">engineers on staff</div></div>
+        <div class="a-stat"><div class="n">1+</div><div class="l">countries reached</div></div>
+      </div>
+    </div>
+    <div class="about-visual">
+      <div class="about-ring"></div>
+      <div class="about-ring about-ring2"></div>
+      <div class="about-mono">Vivehara<span>.</span>Technologies</div> <!-- EDIT: Your logo/monogram -->
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEAM ===================== -->
+<section id="team" class="section-bg">
+  <div class="s-tag">// the people</div>
+  <div class="s-title">Our team</div>
+  <div class="s-sub">Senior engineers, designers, and strategists. No juniors billing senior hours.</div>
+  <div class="team-grid">
+    <!-- EDIT: Replace with your real team members. Change nth-child colors as needed. -->
+    <div class="team-card">
+      <div class="t-avatar"><img src="images/pic2.jpeg" alt="Vedhanayaki profile picture"></div> <!-- EDIT: Initials -->
+      <div class="t-info"><h4>Vedhanayaki</h4><p>CEO & Co-Founder</p></div>
+    </div>
+    <div class="team-card">
+      <div class="t-avatar"><img src="images/pic1.jpeg" alt="Vijayakumar profile picture"></div>
+      <div class="t-info"><h4>Vijayakumar</h4><p>Managing Director</p></div>
+    </div>
+    <div class="team-card">
+      <div class="t-avatar"><img src="images/pic3.jpeg" alt="Harish profile picture"></div>
+      <div class="t-info"><h4>Harish</h4><p>Trainee Developer</p></div>
+    </div>
+    <div class="team-card">
+      <div class="t-avatar"><img src="images/pic4.jpeg" alt="Ragavi profile picture"></div>
+      <div class="t-info"><h4>Ragavi</h4><p>Operations Manager</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section class="testi-wrap">
+  <div class="s-tag">// what clients say</div>
+  <div class="s-title">Testimonials</div>
+  <div class="testi-grid">
+    <!-- EDIT: Replace with real client quotes -->
+    <div class="t-card">
+      <p class="t-quote">VIVEHARA rebuilt our entire data infrastructure in 10 weeks. What we expected to take a year was done faster, cleaner, and under budget. Remarkable team.</p>
+      <div class="t-author">
+        <div class="t-dot blue">JT</div>
+        <div><h5>James Torres</h5><p>VP Engineering, Caspian Health</p></div>
+      </div>
+    </div>
+    <div class="t-card">
+      <p class="t-quote">They don't just write code — they think about the product. Every feature shipped came with suggestions we hadn't thought of. That's rare.</p>
+      <div class="t-author">
+        <div class="t-dot green">NL</div>
+        <div><h5>Nadia Laurent</h5><p>Product Director, Forta Labs</p></div>
+      </div>
+    </div>
+    <div class="t-card">
+      <p class="t-quote">Our uptime went from 94% to 99.9% within 3 months. The cloud migration was seamless and the security posture is night-and-day better.</p>
+      <div class="t-author">
+        <div class="t-dot cyan">RB</div>
+        <div><h5>Ryan Blackwell</h5><p>CTO, Meridian Finance</p></div>
+      </div>
+    </div>
+    <div class="t-card">
+      <p class="t-quote">Fast, honest, and technically excellent. Three agencies before VIVEHARA — none came close to this level of craft and communication.</p>
+      <div class="t-author">
+        <div class="t-dot purple">AL</div>
+        <div><h5>Amara Leung</h5><p>CEO, ShiftBase</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT / CTA ===================== -->
+<section id="contact" class="section-white">
+  <div class="cta-inner">
+    <div class="s-tag center">// get in touch</div>
+    <h2>Ready to build something <span>great?</span></h2>
+    <p>Drop your email and we'll reach out within 24 hours to understand your challenge and see if we're the right fit.</p>
+    <div class="cta-form">
+      <!-- EDIT: Hook this form up to your backend or a service like Formspree / Mailchimp -->
+      <input type="email" placeholder="vivehara2026@gmail.com" id="email-input" />
+      <button class="btn-p" onclick="handleSubmit()">Send</button>
+    </div>
+    <div class="cta-note">No spam. No sales decks. Just a real conversation.</div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <p>© 2026 VIVEHARA Technologies</p> <!-- EDIT: Your company name and year -->
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+  </div>
+</footer>
+
+<script>
+/* ===================== SMOOTH SCROLL ===================== */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target) target.scrollIntoView({behavior:'smooth'});
+  });
+});
+
+/* ===================== CONTACT FORM ===================== */
+/* EDIT: Replace this with your real form handler (Formspree, EmailJS, etc.) */
+function handleSubmit() {
+  const email = document.getElementById('email-input').value;
+  if(!email || !email.includes('@')) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+  /* Example Formspree integration:
+  fetch('https://formspree.io/f/YOUR_FORM_ID', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email})
+  }).then(() => alert('Thanks! We will be in touch within 24 hours.'));
+  */
+  alert('Thanks! We\'ll be in touch within 24 hours.');
+  document.getElementById('email-input').value = '';
+}
+</script>
+
 </body>
 </html>
