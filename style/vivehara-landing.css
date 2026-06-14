@@ -36,7 +36,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:1.1rem
 .hero{padding:5.5rem 3rem 4.5rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;background:var(--white);position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
 .hero-content{width:35%;position:relative;z-index:1}
-.embed-container {width:75%;flex:1}
+.embed-container {width:75%}
 .hero-chip{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:1px solid #bfdbfe;padding:0.35rem 0.9rem;font-size:0.75rem;font-family:var(--mono);color:var(--blue);border-radius:100px;margin-bottom:1.75rem;font-weight:500}
 .chip-dot{width:6px;height:6px;background:var(--blue);border-radius:50%}
 h1{font-weight:700;font-size:clamp(2rem,3.8vw,3.2rem);line-height:1.08;letter-spacing:-0.04em;color:var(--navy);margin-bottom:1.25rem}
