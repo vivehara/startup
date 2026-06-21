@@ -6,6 +6,15 @@
 <title>VIVEHARA Technologies — Technology that moves your business forward</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style/vivehara-landing.css">
+<script>
+/* ===================== THEME (DARK MODE) — applied before paint to avoid flash ===================== */
+(function() {
+  const saved = localStorage.getItem('vivehara-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+</script>
 </head>
 <body>
 
@@ -25,6 +34,10 @@
   </ul>
   <div class="nav-right">
     <div class="nav-status"><div class="status-dot"></div>All systems operational</div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
     <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get Started</button>
   </div>
 </nav>
@@ -240,6 +253,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const target = document.querySelector(a.getAttribute('href'));
     if(target) target.scrollIntoView({behavior:'smooth'});
   });
+});
+
+/* ===================== THEME TOGGLE ===================== */
+const themeToggleBtn = document.getElementById('theme-toggle');
+themeToggleBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('vivehara-theme', 'light');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('vivehara-theme', 'dark');
+  }
 });
 
 /* ===================== CONTACT FORM ===================== */
