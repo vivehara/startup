@@ -47,13 +47,13 @@
 
   <div class="hero-content">
     <div class="hero-chip">
-      <div class="chip-dot"></div>
+      <!--<div class="chip-dot"></div>
       200+ companies — 30+ countries <!-- EDIT: Update badge text -->
     </div>
-    <h1>Technology that <em>moves</em> your business forward</h1> <!-- EDIT: Your headline -->
-    <p class="hero-sub">
+    <h1>Technology that <em>moves</em> your business to <em>future</em></h1><!-- EDIT: Your headline -->
+    <!--- <p class="hero-sub">
       Scalable software and digital infrastructure for companies ready to lead their industries — not follow.
-    </p> <!-- EDIT: Your subheadline -->
+    </p> EDIT: Your subheadline 
     <div class="hero-btns">
       <button class="btn-p" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
         Explore Services
@@ -61,8 +61,128 @@
       <button class="btn-o" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
         About Us →
       </button>
-    </div>
+    </div> -->
+
+    <!-- CURRENCY CONVERSION BOT -->
+     <div class="card">
+      <div class="card-header">
+      <p class="card-title" style="font-weight: bold";>1 USD &middot; Live rates =>>></p>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
   </div>
+
+  <!-- <p class="section-label">Currencies</p> -->
+  <table aria-label="Currency rates for 1 USD">
+    <thead><tr><th>Currency</th><th>Code</th><th>Rate</th></tr></thead>
+    <tbody id="currency-body"></tbody>
+  </table>
+
+  <p class="section-label" style="font-weight: bold";>Precious metals (per Gram)</p>
+  <table aria-label="Spot prices for gold and silver">
+    <thead><tr><th>Metal</th><th>Unit</th><th>Spot price</th></tr></thead>
+    <tbody id="metals-body"></tbody>
+  </table>
+
+  <p id="footer-note" class="footer-note"></p>
+  <p id="error-msg" role="alert"></p>
+</div>
+
+<script>
+  const CURRENCIES = [
+    { code: 'INR', name: 'Indian Rupee',     flag: '🇮🇳' },
+    { code: 'EUR', name: 'Euro',              flag: '🇪🇺' },
+    { code: 'GBP', name: 'British Pound',     flag: '🇬🇧' }, 
+  ];
+
+  const METALS = [
+    { symbol: 'XAU', name: 'Gold',   abbr: 'Au', cls: 'gold-icon'   },
+    { symbol: 'XAG', name: 'Silver', abbr: 'Ag', cls: 'silver-icon' },
+  ];
+
+  function skeletonRows(count, cols) {
+    return Array.from({ length: count }, () =>
+      `<tr>${Array.from({ length: cols }, () => `<td><span class="skeleton"></span></td>`).join('')}</tr>`
+    ).join('');
+  }
+
+  function fmtRate(code, value) {
+    const decimals = ['JPY', 'INR', 'IDR'].includes(code) ? 2 : 4;
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(value);
+  }
+
+  async function fetchAll() {
+    const btn      = document.getElementById('refresh-btn');
+    const footer   = document.getElementById('footer-note');
+    const errorEl  = document.getElementById('error-msg');
+    const cb       = document.getElementById('currency-body');
+    const mb       = document.getElementById('metals-body');
+
+    btn.disabled = true;
+    errorEl.style.display = 'none';
+    footer.textContent = '';
+    cb.innerHTML = skeletonRows(CURRENCIES.length, 3);
+    mb.innerHTML = skeletonRows(METALS.length, 3);
+
+    try {
+      const symbols = CURRENCIES.map(c => c.code).join(',');
+      const [fxRes, ...metalRes] = await Promise.all([
+        fetch(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${symbols}`),
+        ...METALS.map(m => fetch(`https://api.gold-api.com/price/${m.symbol}`))
+      ]);
+
+      if (!fxRes.ok) throw new Error('FX fetch failed');
+      const fxData    = await fxRes.json();
+      const metalData = await Promise.all(metalRes.map(r => r.ok ? r.json() : null));
+
+      cb.innerHTML = CURRENCIES.map(c => {
+        const rate = fxData.rates[c.code];
+        const display = rate !== undefined ? fmtRate(c.code, rate) : '—';
+        return `<tr>
+          <td><div class="item-cell">
+            <span class="flag">${c.flag}</span>
+            <div class="item-name">${c.name}</div>
+          </div></td>
+          <td><span class="badge">${c.code}</span></td>
+          <td>${display}</td>
+        </tr>`;
+      }).join('');
+      const TROY_OUNCE_TO_GRAMS = 31.1034768;  
+      mb.innerHTML = METALS.map((m, i) => {
+        const d = metalData[i];
+        const price = d && d.price != null
+          ? '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(d.price / TROY_OUNCE_TO_GRAMS)
+          : '—';
+        return `<tr>
+          <td><div class="item-cell">
+            <div class="metal-icon ${m.cls}">${m.abbr}</div>
+            <div class="item-name">${m.name}</div>
+          </div></td>
+          <td><span class="badge">Per Gram</span></td>
+          <td>${price}</td>
+        </tr>`;
+      }).join('');
+
+      footer.textContent = `FX as of ${fxData.date} · FX: frankfurter.dev · Metals: gold-api.com`;
+    } catch (err) {
+      errorEl.textContent = 'Could not fetch rates. Check your connection and try again.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  fetchAll();
+</script>
+</div>
+
 <!-- ===================== AI BOT ===================== -->
   <div class="embed-container">
     
