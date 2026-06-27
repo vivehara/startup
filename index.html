@@ -18,394 +18,95 @@
 </head>
 <body>
 
-<!-- ===================== NAV ===================== -->
 <nav>
   <div class="logo">
-  <div class="logo-mark">
-    <img src="images/ViVeHaRa_Logo.jpg" alt="VIVEHARA Technologies logo">
+    <div class="logo-mark">
+      <img src="images/ViVeHaRa_Logo.jpg" alt="VIVEHARA Technologies logo">
+    </div>
+    VIVEHARA Technologies
   </div>
-    VIVEHARA Technologies <!-- EDIT: Change company name -->
-  </div>
+
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#team">Team</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
+
   <div class="nav-right">
     <div class="weather-strip" id="weatherStrip">
-      <span style="font-size:13px;color:#9ca3af;">Loading weather…</span>
+      <span class="wx-loading">Loading weather…</span>
     </div>
 
-    <!-- ═══ STATUS BAR ═══ -->
-    <div class="status-bar">
-      <span class="dot" id="dot"></span>
-      <span id="statusText">Fetching live data…</span>
-    </div>
-
-  <!-- ═══ DETAILS PANELS (one per city) ═══ -->
-    <div class="details-bar" id="details-raleigh"></div>
-    <div class="details-bar" id="details-chennai"></div>
-    
-    <!-- ═══ SCRIPT FOR WEATHER ═══ -->
-   <script>
-    // ── Config: add or remove cities here ──────────────────────────────────
-    const LOCATIONS = [
-      { id: "raleigh", city: "Raleigh", lat: 35.7796, lon: -78.6382 },
-      { id: "chennai", city: "Chennai", lat: 13.0827, lon: 80.2707  }
-    ];
-
-    // ── Weather code mappings ───────────────────────────────────────────────
-    const WX_CODES = {
-      0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast",
-      45:"Fog", 48:"Rime fog",
-      51:"Light drizzle", 53:"Drizzle", 55:"Dense drizzle",
-      61:"Light rain", 63:"Rain", 65:"Heavy rain",
-      71:"Light snow", 73:"Snow", 75:"Heavy snow", 77:"Snow grains",
-      80:"Rain showers", 81:"Rain showers", 82:"Heavy showers",
-      85:"Snow showers", 86:"Heavy snow showers",
-      95:"Thunderstorm", 96:"Thunderstorm", 99:"Thunderstorm"
-    };
-
-    const WX_ICONS = {
-      0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️", 45:"🌫️", 48:"🌫️",
-      51:"🌦️", 53:"🌦️", 55:"🌧️", 61:"🌧️", 63:"🌧️", 65:"🌧️",
-      71:"❄️", 73:"❄️", 75:"❄️", 77:"🌨️",
-      80:"🌦️", 81:"🌧️", 82:"⛈️", 85:"🌨️", 86:"🌨️",
-      95:"⛈️", 96:"⛈️", 99:"⛈️"
-    };
-
-    // ── Helpers ────────────────────────────────────────────────────────────
-    function aqiInfo(v) {
-      if (v <= 50)  return ["Good",                          "good"];
-      if (v <= 100) return ["Moderate",                      "moderate"];
-      if (v <= 150) return ["Unhealthy for sensitive groups","moderate"];
-      return              ["Unhealthy",                      "bad"];
-    }
-
-    function uvClass(v) {
-      if (v <= 2) return "good";
-      if (v <= 5) return "moderate";
-      return "bad";
-    }
-
-    // ── Fetch one city ─────────────────────────────────────────────────────
-    async function fetchWeather(loc) {
-      const hour = new Date().getUTCHours();
-      const [wRes, aRes] = await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=uv_index&forecast_days=1`),
-        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
-      ]);
-      const w = await wRes.json();
-      const a = await aRes.json();
-      const code = w.current.weather_code;
-      return {
-        temp:      Math.round(w.current.temperature_2m),
-        humidity:  w.current.relative_humidity_2m,
-        wind:      Math.round(w.current.wind_speed_10m),
-        code,
-        condition: WX_CODES[code] ?? "Unknown",
-        icon:      WX_ICONS[code] ?? "🌡️",
-        uv:        w.hourly.uv_index[hour],
-        aqi:       a.current.us_aqi
-      };
-    }
-
-    // ── Build the details panel for a city ────────────────────────────────
-    function buildDetails(id, d) {
-      const [aqiDesc, aqiCls] = aqiInfo(d.aqi);
-      document.getElementById("details-" + id).innerHTML = `
-        <div class="detail-item">
-          <span class="detail-label">Humidity</span>
-          <span class="detail-value">${d.humidity}%</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Wind</span>
-          <span class="detail-value">${d.wind} km/h</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">UV index</span>
-          <span class="detail-value ${uvClass(d.uv)}">${d.uv}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Air quality (AQI)</span>
-          <span class="detail-value ${aqiCls}">${d.aqi} — ${aqiDesc}</span>
-        </div>
-      `;
-    }
-
-    // ── Toggle expand/collapse ─────────────────────────────────────────────
-    let activeCity = null;
-
-    function toggleDetails(id) {
-      LOCATIONS.forEach(loc => {
-        const bar  = document.getElementById("details-" + loc.id);
-        const chip = document.getElementById("chip-" + loc.id);
-        if (loc.id === id) {
-          if (activeCity === id) {
-            bar.classList.remove("visible");
-            chip.classList.remove("active");
-            activeCity = null;
-          } else {
-            bar.classList.add("visible");
-            chip.classList.add("active");
-            activeCity = id;
-          }
-        } else {
-          bar.classList.remove("visible");
-          chip.classList.remove("active");
-        }
-      });
-    }
-
-    // ── Main init / refresh ────────────────────────────────────────────────
-    async function init() {
-      const strip      = document.getElementById("weatherStrip");
-      const dot        = document.getElementById("dot");
-      const statusText = document.getElementById("statusText");
-
-      strip.innerHTML = `<span style="font-size:13px;color:#9ca3af;">Loading…</span>`;
-      dot.classList.remove("live");
-      statusText.textContent = "Fetching live data…";
-
-      try {
-        const results = await Promise.all(LOCATIONS.map(l => fetchWeather(l)));
-        strip.innerHTML = "";
-
-        results.forEach((d, i) => {
-          const loc = LOCATIONS[i];
-
-          if (i > 0) {
-            const div = document.createElement("span");
-            div.className = "wx-divider";
-            strip.appendChild(div);
-          }
-
-          const chip = document.createElement("div");
-          chip.className = "city-chip";
-          chip.id = "chip-" + loc.id;
-          chip.setAttribute("role", "button");
-          chip.setAttribute("aria-expanded", "false");
-          chip.onclick = () => {
-            toggleDetails(loc.id);
-            chip.setAttribute("aria-expanded", activeCity === loc.id ? "true" : "false");
-          };
-          chip.innerHTML = `
-            <span class="chip-icon" aria-hidden="true">${d.icon}</span>
-            <span class="chip-city">${loc.city}</span>
-            <span class="chip-temp">${d.temp}°C</span>
-            <span class="chip-cond">${d.condition}</span>
-          `;
-          strip.appendChild(chip);
-          buildDetails(loc.id, d);
-        });
-
-        // Refresh button
-        const btn = document.createElement("button");
-        btn.className = "refresh-btn";
-        btn.title = "Refresh weather";
-        btn.setAttribute("aria-label", "Refresh weather data");
-        btn.innerHTML = "↻";
-        btn.onclick = () => {
-          btn.style.transition = "transform 0.5s";
-          btn.style.transform  = "rotate(360deg)";
-          setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; init(); }, 550);
-        };
-        strip.appendChild(btn);
-
-        // Status bar
-        const now = new Date();
-        dot.classList.add("live");
-        statusText.textContent = `Live data · updated ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")} local time`;
-
-      } catch (err) {
-        strip.innerHTML = `<span style="font-size:13px;color:#ef4444;">Could not load weather — check connection</span>`;
-        statusText.textContent = "Data unavailable";
-        console.error("Weather fetch error:", err);
-      }
-    }
-
-    init();
-  </script>
-
-
-
-
-    <!-- ═══ END SCRIPT FOR WEATHER ═══ -->
-    
     <div class="nav-status"><div class="status-dot"></div>All systems operational</div>
+
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
       <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
       <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
     </button>
+
     <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get Started</button>
   </div>
 </nav>
 
-<!-- ===================== HERO ===================== -->
+<div class="wx-status-bar">
+  <span class="dot" id="dot"></span>
+  <span id="statusText">Fetching live data…</span>
+</div>
+<div class="details-bar" id="details-raleigh"></div>
+<div class="details-bar" id="details-chennai"></div>
+
 <div class="hero">
 
   <div class="hero-content">
-    <div class="hero-chip">
-      <!--<div class="chip-dot"></div>
-      200+ companies — 30+ countries <!-- EDIT: Update badge text -->
-    </div>
-    <h1>Technology that <em>moves</em> your business to <em>future</em></h1><!-- EDIT: Your headline -->
-    <!--- <p class="hero-sub">
-      Scalable software and digital infrastructure for companies ready to lead their industries — not follow.
-    </p> EDIT: Your subheadline 
-    <div class="hero-btns">
-      <button class="btn-p" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
-        Explore Services
-      </button>
-      <button class="btn-o" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
-        About Us →
-      </button>
-    </div> -->
+    <h1>Technology that <em>moves</em> your business to <em>future</em></h1>
 
-    <!-- CURRENCY CONVERSION BOT -->
-     <div class="card">
+    <div class="card">
       <div class="card-header">
-      <p class="card-title" style="font-weight: bold";>1 USD &middot; Live rates =>>></p>
-    <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-      </svg>
-      Refresh
-    </button>
+        <p class="card-title">1 USD &middot; Live rates =&gt;&gt;&gt;</p>
+        <button class="currency-refresh-btn" id="refresh-btn" onclick="fetchAll()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      <table aria-label="Currency rates for 1 USD">
+        <thead><tr><th>Currency</th><th>Code</th><th>Rate</th></tr></thead>
+        <tbody id="currency-body"></tbody>
+      </table>
+
+      <p class="section-label">Precious metals (per gram)</p>
+      <table aria-label="Spot prices for gold and silver">
+        <thead><tr><th>Metal</th><th>Unit</th><th>Spot price</th></tr></thead>
+        <tbody id="metals-body"></tbody>
+      </table>
+
+      <p id="footer-note" class="footer-note"></p>
+      <p id="error-msg" role="alert"></p>
+    </div>
   </div>
 
-  <!-- <p class="section-label">Currencies</p> -->
-  <table aria-label="Currency rates for 1 USD">
-    <thead><tr><th>Currency</th><th>Code</th><th>Rate</th></tr></thead>
-    <tbody id="currency-body"></tbody>
-  </table>
-
-  <p class="section-label" style="font-weight: bold";>Precious metals (per Gram)</p>
-  <table aria-label="Spot prices for gold and silver">
-    <thead><tr><th>Metal</th><th>Unit</th><th>Spot price</th></tr></thead>
-    <tbody id="metals-body"></tbody>
-  </table>
-
-  <p id="footer-note" class="footer-note"></p>
-  <p id="error-msg" role="alert"></p>
-</div>
-
-<script>
-  const CURRENCIES = [
-    { code: 'INR', name: 'Indian Rupee',     flag: '🇮🇳' },
-    { code: 'EUR', name: 'Euro',              flag: '🇪🇺' },
-    { code: 'GBP', name: 'British Pound',     flag: '🇬🇧' }, 
-  ];
-
-  const METALS = [
-    { symbol: 'XAU', name: 'Gold',   abbr: 'Au', cls: 'gold-icon'   },
-    { symbol: 'XAG', name: 'Silver', abbr: 'Ag', cls: 'silver-icon' },
-  ];
-
-  function skeletonRows(count, cols) {
-    return Array.from({ length: count }, () =>
-      `<tr>${Array.from({ length: cols }, () => `<td><span class="skeleton"></span></td>`).join('')}</tr>`
-    ).join('');
-  }
-
-  function fmtRate(code, value) {
-    const decimals = ['JPY', 'INR', 'IDR'].includes(code) ? 2 : 4;
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(value);
-  }
-
-  async function fetchAll() {
-    const btn      = document.getElementById('refresh-btn');
-    const footer   = document.getElementById('footer-note');
-    const errorEl  = document.getElementById('error-msg');
-    const cb       = document.getElementById('currency-body');
-    const mb       = document.getElementById('metals-body');
-
-    btn.disabled = true;
-    errorEl.style.display = 'none';
-    footer.textContent = '';
-    cb.innerHTML = skeletonRows(CURRENCIES.length, 3);
-    mb.innerHTML = skeletonRows(METALS.length, 3);
-
-    try {
-      const symbols = CURRENCIES.map(c => c.code).join(',');
-      const [fxRes, ...metalRes] = await Promise.all([
-        fetch(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${symbols}`),
-        ...METALS.map(m => fetch(`https://api.gold-api.com/price/${m.symbol}`))
-      ]);
-
-      if (!fxRes.ok) throw new Error('FX fetch failed');
-      const fxData    = await fxRes.json();
-      const metalData = await Promise.all(metalRes.map(r => r.ok ? r.json() : null));
-
-      cb.innerHTML = CURRENCIES.map(c => {
-        const rate = fxData.rates[c.code];
-        const display = rate !== undefined ? fmtRate(c.code, rate) : '—';
-        return `<tr>
-          <td><div class="item-cell">
-            <span class="flag">${c.flag}</span>
-            <div class="item-name">${c.name}</div>
-          </div></td>
-          <td><span class="badge">${c.code}</span></td>
-          <td>${display}</td>
-        </tr>`;
-      }).join('');
-      const TROY_OUNCE_TO_GRAMS = 31.1034768;  
-      mb.innerHTML = METALS.map((m, i) => {
-        const d = metalData[i];
-        const price = d && d.price != null
-          ? '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(d.price / TROY_OUNCE_TO_GRAMS)
-          : '—';
-        return `<tr>
-          <td><div class="item-cell">
-            <div class="metal-icon ${m.cls}">${m.abbr}</div>
-            <div class="item-name">${m.name}</div>
-          </div></td>
-          <td><span class="badge">Per Gram</span></td>
-          <td>${price}</td>
-        </tr>`;
-      }).join('');
-
-      footer.textContent = `FX as of ${fxData.date} · FX: frankfurter.dev · Metals: gold-api.com`;
-    } catch (err) {
-      errorEl.textContent = 'Could not fetch rates. Check your connection and try again.';
-      errorEl.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  fetchAll();
-</script>
-</div>
-
-<!-- ===================== AI BOT ===================== -->
   <div class="embed-container">
-    
-      <iframe
-        src="https://vivehara-mentor-trainer.hf.space"
-        frameborder="0"
-        width="100%"
-        height="750px"
-        allow="microphone; clipboard-write"
-        style="border: 1px solid #e2e8f0; border-radius: 12px;">
-      </iframe>
-    
+    <iframe
+      src="https://vivehara-mentor-trainer.hf.space"
+      frameborder="0"
+      width="100%"
+      height="750px"
+      allow="microphone; clipboard-write"
+      style="border: 1px solid #e2e8f0; border-radius: 12px;">
+    </iframe>
   </div>
 
 </div>
 
-<!-- ===================== SERVICES ===================== -->
 <section id="services" class="section-white">
   <div class="s-tag">// what we offer</div>
   <div class="s-title">Our services</div>
   <div class="s-sub">From architecture to deployment — we handle every layer of your technology stack with precision.</div>
   <div class="svc-grid">
-    <!-- EDIT: Replace each service block with your own -->
     <div class="svc">
       <div class="svc-num">01</div>
       <div class="svc-icon">⚙</div>
@@ -451,17 +152,14 @@
   </div>
 </section>
 
-<!-- ===================== ABOUT ===================== -->
 <section id="about" class="section-white">
   <div class="about-inner">
     <div>
       <div class="s-tag">// who we are</div>
       <div class="s-title">About us</div>
-      <!-- EDIT: Your company story -->
       <p class="about-text">Founded in 2026, VIVEHARA Technologies has grown from a lean engineering consultancy into a full-stack technology partner trusted by enterprises across +1 countries.</p>
       <p class="about-text">We believe great software isn't just built — it's engineered. Every decision is rooted in long-term thinking, not quick fixes.</p>
       <div class="a-stats">
-        <!-- EDIT: Your real stats -->
         <div class="a-stat"><div class="n">1yr</div><div class="l">in business</div></div>
         <div class="a-stat"><div class="n">2+</div><div class="l">clients served</div></div>
         <div class="a-stat"><div class="n">2</div><div class="l">engineers on staff</div></div>
@@ -471,20 +169,18 @@
     <div class="about-visual">
       <div class="about-ring"></div>
       <div class="about-ring about-ring2"></div>
-      <div class="about-mono">Vivehara<span>.</span>Technologies</div> <!-- EDIT: Your logo/monogram -->
+      <div class="about-mono">Vivehara<span>.</span>Technologies</div>
     </div>
   </div>
 </section>
 
-<!-- ===================== TEAM ===================== -->
 <section id="team" class="section-bg">
   <div class="s-tag">// the people</div>
   <div class="s-title">Our team</div>
   <div class="s-sub">Senior engineers, designers, and strategists. No juniors billing senior hours.</div>
   <div class="team-grid">
-    <!-- EDIT: Replace with your real team members. Change nth-child colors as needed. -->
     <div class="team-card">
-      <div class="t-avatar"><img src="images/pic2.jpeg" alt="Vedhanayaki profile picture"></div> <!-- EDIT: Initials -->
+      <div class="t-avatar"><img src="images/pic2.jpeg" alt="Vedhanayaki profile picture"></div>
       <div class="t-info"><h4>TCV</h4><p>CEO & Co-Founder</p></div>
     </div>
     <div class="team-card">
@@ -502,12 +198,10 @@
   </div>
 </section>
 
-<!-- ===================== TESTIMONIALS ===================== -->
 <section class="testi-wrap">
   <div class="s-tag">// what clients say</div>
   <div class="s-title">Testimonials</div>
   <div class="testi-grid">
-    <!-- EDIT: Replace with real client quotes -->
     <div class="t-card">
       <p class="t-quote">VIVEHARA rebuilt our entire data infrastructure in 10 weeks. What we expected to take a year was done faster, cleaner, and under budget. Remarkable team.</p>
       <div class="t-author">
@@ -539,14 +233,12 @@
   </div>
 </section>
 
-<!-- ===================== CONTACT / CTA ===================== -->
 <section id="contact" class="section-white">
   <div class="cta-inner">
     <div class="s-tag center">// get in touch</div>
     <h2>Ready to build something <span>great?</span></h2>
     <p>Drop your email and we'll reach out within 24 hours to understand your challenge and see if we're the right fit.</p>
     <div class="cta-form">
-      <!-- EDIT: Hook this form up to your backend or a service like Formspree / Mailchimp -->
       <input type="email" placeholder="vivehara2026@gmail.com" id="email-input" />
       <button class="btn-p" onclick="handleSubmit()">Send</button>
     </div>
@@ -554,9 +246,8 @@
   </div>
 </section>
 
-<!-- ===================== FOOTER ===================== -->
 <footer>
-  <p>© 2026 VIVEHARA Technologies</p> <!-- EDIT: Your company name and year -->
+  <p>© 2026 VIVEHARA Technologies</p>
   <div class="footer-links">
     <a href="#">Privacy</a>
     <a href="#">Terms</a>
@@ -566,46 +257,277 @@
 </footer>
 
 <script>
-/* ===================== SMOOTH SCROLL ===================== */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    const target = document.querySelector(a.getAttribute('href'));
-    if(target) target.scrollIntoView({behavior:'smooth'});
+  const LOCATIONS = [
+    { id: "raleigh", city: "Raleigh", lat: 35.7796, lon: -78.6382 },
+    { id: "chennai", city: "Chennai", lat: 13.0827, lon: 80.2707  }
+  ];
+
+  const WX_CODES = {
+    0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast",
+    45:"Fog", 48:"Rime fog",
+    51:"Light drizzle", 53:"Drizzle", 55:"Dense drizzle",
+    61:"Light rain", 63:"Rain", 65:"Heavy rain",
+    71:"Light snow", 73:"Snow", 75:"Heavy snow", 77:"Snow grains",
+    80:"Rain showers", 81:"Rain showers", 82:"Heavy showers",
+    85:"Snow showers", 86:"Heavy snow showers",
+    95:"Thunderstorm", 96:"Thunderstorm", 99:"Thunderstorm"
+  };
+
+  const WX_ICONS = {
+    0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️", 45:"🌫️", 48:"🌫️",
+    51:"🌦️", 53:"🌦️", 55:"🌧️", 61:"🌧️", 63:"🌧️", 65:"🌧️",
+    71:"❄️", 73:"❄️", 75:"❄️", 77:"🌨️",
+    80:"🌦️", 81:"🌧️", 82:"⛈️", 85:"🌨️", 86:"🌨️",
+    95:"⛈️", 96:"⛈️", 99:"⛈️"
+  };
+
+  function aqiInfo(v) {
+    if (v <= 50)  return ["Good", "good"];
+    if (v <= 100) return ["Moderate", "moderate"];
+    if (v <= 150) return ["Unhealthy for sensitive groups", "moderate"];
+    return ["Unhealthy", "bad"];
+  }
+
+  function uvClass(v) {
+    if (v <= 2) return "good";
+    if (v <= 5) return "moderate";
+    return "bad";
+  }
+
+  async function fetchWeather(loc) {
+    const hour = new Date().getUTCHours();
+    const [wRes, aRes] = await Promise.all([
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=uv_index&forecast_days=1`),
+      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
+    ]);
+    const w = await wRes.json();
+    const a = await aRes.json();
+    const code = w.current.weather_code;
+    return {
+      temp:      Math.round(w.current.temperature_2m),
+      humidity:  w.current.relative_humidity_2m,
+      wind:      Math.round(w.current.wind_speed_10m),
+      code,
+      condition: WX_CODES[code] ?? "Unknown",
+      icon:      WX_ICONS[code] ?? "🌡️",
+      uv:        w.hourly.uv_index[hour],
+      aqi:       a.current.us_aqi
+    };
+  }
+
+  function buildDetails(id, d) {
+    const [aqiDesc, aqiCls] = aqiInfo(d.aqi);
+    document.getElementById("details-" + id).innerHTML = `
+      <div class="detail-item"><span class="detail-label">Humidity</span><span class="detail-value">${d.humidity}%</span></div>
+      <div class="detail-item"><span class="detail-label">Wind</span><span class="detail-value">${d.wind} km/h</span></div>
+      <div class="detail-item"><span class="detail-label">UV index</span><span class="detail-value ${uvClass(d.uv)}">${d.uv}</span></div>
+      <div class="detail-item"><span class="detail-label">Air quality (AQI)</span><span class="detail-value ${aqiCls}">${d.aqi} — ${aqiDesc}</span></div>
+    `;
+  }
+
+  let activeCity = null;
+
+  function toggleDetails(id) {
+    LOCATIONS.forEach(loc => {
+      const bar  = document.getElementById("details-" + loc.id);
+      const chip = document.getElementById("chip-" + loc.id);
+      if (!bar || !chip) return;
+      if (loc.id === id) {
+        if (activeCity === id) {
+          bar.classList.remove("visible");
+          chip.classList.remove("active");
+          activeCity = null;
+        } else {
+          bar.classList.add("visible");
+          chip.classList.add("active");
+          activeCity = id;
+        }
+      } else {
+        bar.classList.remove("visible");
+        chip.classList.remove("active");
+      }
+    });
+  }
+
+  async function initWeather() {
+    const strip      = document.getElementById("weatherStrip");
+    const dot        = document.getElementById("dot");
+    const statusText = document.getElementById("statusText");
+
+    strip.innerHTML = `<span class="wx-loading">Loading…</span>`;
+    dot.classList.remove("live");
+    statusText.textContent = "Fetching live data…";
+
+    try {
+      const results = await Promise.all(LOCATIONS.map(l => fetchWeather(l)));
+      strip.innerHTML = "";
+
+      results.forEach((d, i) => {
+        const loc = LOCATIONS[i];
+        if (i > 0) {
+          const div = document.createElement("span");
+          div.className = "wx-divider";
+          strip.appendChild(div);
+        }
+        const chip = document.createElement("div");
+        chip.className = "city-chip";
+        chip.id = "chip-" + loc.id;
+        chip.setAttribute("role", "button");
+        chip.setAttribute("aria-expanded", "false");
+        chip.onclick = () => {
+          toggleDetails(loc.id);
+          chip.setAttribute("aria-expanded", activeCity === loc.id ? "true" : "false");
+        };
+        chip.innerHTML = `
+          <span class="chip-icon" aria-hidden="true">${d.icon}</span>
+          <span class="chip-city">${loc.city}</span>
+          <span class="chip-temp">${d.temp}°C</span>
+          <span class="chip-cond">${d.condition}</span>
+        `;
+        strip.appendChild(chip);
+        buildDetails(loc.id, d);
+      });
+
+      const btn = document.createElement("button");
+      btn.className = "wx-refresh-btn";
+      btn.title = "Refresh weather";
+      btn.setAttribute("aria-label", "Refresh weather data");
+      btn.innerHTML = "↻";
+      btn.onclick = () => {
+        btn.style.transition = "transform 0.5s";
+        btn.style.transform  = "rotate(360deg)";
+        setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; initWeather(); }, 550);
+      };
+      strip.appendChild(btn);
+
+      const now = new Date();
+      dot.classList.add("live");
+      statusText.textContent = `Live data · updated ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")} local time`;
+
+    } catch (err) {
+      strip.innerHTML = `<span class="wx-error">Could not load weather — check connection</span>`;
+      statusText.textContent = "Data unavailable";
+      console.error("Weather fetch error:", err);
+    }
+  }
+
+  initWeather();
+</script>
+
+<script>
+  const CURRENCIES = [
+    { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
+    { code: 'EUR', name: 'Euro',          flag: '🇪🇺' },
+    { code: 'GBP', name: 'British Pound', flag: '🇬🇧' },
+  ];
+
+  const METALS = [
+    { symbol: 'XAU', name: 'Gold',   abbr: 'Au', cls: 'gold-icon'   },
+    { symbol: 'XAG', name: 'Silver', abbr: 'Ag', cls: 'silver-icon' },
+  ];
+
+  function skeletonRows(count, cols) {
+    return Array.from({ length: count }, () =>
+      `<tr>${Array.from({ length: cols }, () => `<td><span class="skeleton"></span></td>`).join('')}</tr>`
+    ).join('');
+  }
+
+  function fmtRate(code, value) {
+    const decimals = ['JPY', 'INR', 'IDR'].includes(code) ? 2 : 4;
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(value);
+  }
+
+  async function fetchAll() {
+    const btn     = document.getElementById('refresh-btn');
+    const footer  = document.getElementById('footer-note');
+    const errorEl = document.getElementById('error-msg');
+    const cb      = document.getElementById('currency-body');
+    const mb      = document.getElementById('metals-body');
+
+    btn.disabled = true;
+    errorEl.style.display = 'none';
+    footer.textContent = '';
+    cb.innerHTML = skeletonRows(CURRENCIES.length, 3);
+    mb.innerHTML = skeletonRows(METALS.length, 3);
+
+    try {
+      const symbols = CURRENCIES.map(c => c.code).join(',');
+      const [fxRes, ...metalRes] = await Promise.all([
+        fetch(`https://api.frankfurter.dev/v1/latest?base=USD&symbols=${symbols}`),
+        ...METALS.map(m => fetch(`https://api.gold-api.com/price/${m.symbol}`))
+      ]);
+
+      if (!fxRes.ok) throw new Error('FX fetch failed');
+      const fxData    = await fxRes.json();
+      const metalData = await Promise.all(metalRes.map(r => r.ok ? r.json() : null));
+
+      cb.innerHTML = CURRENCIES.map(c => {
+        const rate    = fxData.rates[c.code];
+        const display = rate !== undefined ? fmtRate(c.code, rate) : '—';
+        return `<tr>
+          <td><div class="item-cell"><span class="flag">${c.flag}</span><div class="item-name">${c.name}</div></div></td>
+          <td><span class="badge">${c.code}</span></td>
+          <td>${display}</td>
+        </tr>`;
+      }).join('');
+
+      const TROY = 31.1034768;
+      mb.innerHTML = METALS.map((m, i) => {
+        const d     = metalData[i];
+        const price = d && d.price != null
+          ? '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(d.price / TROY)
+          : '—';
+        return `<tr>
+          <td><div class="item-cell"><div class="metal-icon ${m.cls}">${m.abbr}</div><div class="item-name">${m.name}</div></div></td>
+          <td><span class="badge">Per Gram</span></td>
+          <td>${price}</td>
+        </tr>`;
+      }).join('');
+
+      footer.textContent = `FX as of ${fxData.date} · FX: frankfurter.dev · Metals: gold-api.com`;
+    } catch (err) {
+      errorEl.textContent = 'Could not fetch rates. Check your connection and try again.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  fetchAll();
+</script>
+
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
   });
-});
 
-/* ===================== THEME TOGGLE ===================== */
-const themeToggleBtn = document.getElementById('theme-toggle');
-themeToggleBtn.addEventListener('click', () => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('vivehara-theme', 'light');
-  } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('vivehara-theme', 'dark');
-  }
-});
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('vivehara-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('vivehara-theme', 'dark');
+    }
+  });
 
-/* ===================== CONTACT FORM ===================== */
-/* EDIT: Replace this with your real form handler (Formspree, EmailJS, etc.) */
-function handleSubmit() {
-  const email = document.getElementById('email-input').value;
-  if(!email || !email.includes('@')) {
-    alert('Please enter a valid email address.');
-    return;
+  function handleSubmit() {
+    const email = document.getElementById('email-input').value;
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    alert("Thanks! We'll be in touch within 24 hours.");
+    document.getElementById('email-input').value = '';
   }
-  /* Example Formspree integration:
-  fetch('https://formspree.io/f/YOUR_FORM_ID', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({email})
-  }).then(() => alert('Thanks! We will be in touch within 24 hours.'));
-  */
-  alert('Thanks! We\'ll be in touch within 24 hours.');
-  document.getElementById('email-input').value = '';
-}
 </script>
 
 </body>
