@@ -33,6 +33,206 @@
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-right">
+    <div class="weather-strip" id="weatherStrip">
+      <span style="font-size:13px;color:#9ca3af;">Loading weather…</span>
+    </div>
+
+    <!-- ═══ STATUS BAR ═══ -->
+    <div class="status-bar">
+      <span class="dot" id="dot"></span>
+      <span id="statusText">Fetching live data…</span>
+    </div>
+
+  <!-- ═══ DETAILS PANELS (one per city) ═══ -->
+    <div class="details-bar" id="details-raleigh"></div>
+    <div class="details-bar" id="details-chennai"></div>
+    
+    <!-- ═══ SCRIPT FOR WEATHER ═══ -->
+   <script>
+    // ── Config: add or remove cities here ──────────────────────────────────
+    const LOCATIONS = [
+      { id: "raleigh", city: "Raleigh", lat: 35.7796, lon: -78.6382 },
+      { id: "chennai", city: "Chennai", lat: 13.0827, lon: 80.2707  }
+    ];
+
+    // ── Weather code mappings ───────────────────────────────────────────────
+    const WX_CODES = {
+      0:"Clear sky", 1:"Mainly clear", 2:"Partly cloudy", 3:"Overcast",
+      45:"Fog", 48:"Rime fog",
+      51:"Light drizzle", 53:"Drizzle", 55:"Dense drizzle",
+      61:"Light rain", 63:"Rain", 65:"Heavy rain",
+      71:"Light snow", 73:"Snow", 75:"Heavy snow", 77:"Snow grains",
+      80:"Rain showers", 81:"Rain showers", 82:"Heavy showers",
+      85:"Snow showers", 86:"Heavy snow showers",
+      95:"Thunderstorm", 96:"Thunderstorm", 99:"Thunderstorm"
+    };
+
+    const WX_ICONS = {
+      0:"☀️", 1:"🌤️", 2:"⛅", 3:"☁️", 45:"🌫️", 48:"🌫️",
+      51:"🌦️", 53:"🌦️", 55:"🌧️", 61:"🌧️", 63:"🌧️", 65:"🌧️",
+      71:"❄️", 73:"❄️", 75:"❄️", 77:"🌨️",
+      80:"🌦️", 81:"🌧️", 82:"⛈️", 85:"🌨️", 86:"🌨️",
+      95:"⛈️", 96:"⛈️", 99:"⛈️"
+    };
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function aqiInfo(v) {
+      if (v <= 50)  return ["Good",                          "good"];
+      if (v <= 100) return ["Moderate",                      "moderate"];
+      if (v <= 150) return ["Unhealthy for sensitive groups","moderate"];
+      return              ["Unhealthy",                      "bad"];
+    }
+
+    function uvClass(v) {
+      if (v <= 2) return "good";
+      if (v <= 5) return "moderate";
+      return "bad";
+    }
+
+    // ── Fetch one city ─────────────────────────────────────────────────────
+    async function fetchWeather(loc) {
+      const hour = new Date().getUTCHours();
+      const [wRes, aRes] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=uv_index&forecast_days=1`),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
+      ]);
+      const w = await wRes.json();
+      const a = await aRes.json();
+      const code = w.current.weather_code;
+      return {
+        temp:      Math.round(w.current.temperature_2m),
+        humidity:  w.current.relative_humidity_2m,
+        wind:      Math.round(w.current.wind_speed_10m),
+        code,
+        condition: WX_CODES[code] ?? "Unknown",
+        icon:      WX_ICONS[code] ?? "🌡️",
+        uv:        w.hourly.uv_index[hour],
+        aqi:       a.current.us_aqi
+      };
+    }
+
+    // ── Build the details panel for a city ────────────────────────────────
+    function buildDetails(id, d) {
+      const [aqiDesc, aqiCls] = aqiInfo(d.aqi);
+      document.getElementById("details-" + id).innerHTML = `
+        <div class="detail-item">
+          <span class="detail-label">Humidity</span>
+          <span class="detail-value">${d.humidity}%</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Wind</span>
+          <span class="detail-value">${d.wind} km/h</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">UV index</span>
+          <span class="detail-value ${uvClass(d.uv)}">${d.uv}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Air quality (AQI)</span>
+          <span class="detail-value ${aqiCls}">${d.aqi} — ${aqiDesc}</span>
+        </div>
+      `;
+    }
+
+    // ── Toggle expand/collapse ─────────────────────────────────────────────
+    let activeCity = null;
+
+    function toggleDetails(id) {
+      LOCATIONS.forEach(loc => {
+        const bar  = document.getElementById("details-" + loc.id);
+        const chip = document.getElementById("chip-" + loc.id);
+        if (loc.id === id) {
+          if (activeCity === id) {
+            bar.classList.remove("visible");
+            chip.classList.remove("active");
+            activeCity = null;
+          } else {
+            bar.classList.add("visible");
+            chip.classList.add("active");
+            activeCity = id;
+          }
+        } else {
+          bar.classList.remove("visible");
+          chip.classList.remove("active");
+        }
+      });
+    }
+
+    // ── Main init / refresh ────────────────────────────────────────────────
+    async function init() {
+      const strip      = document.getElementById("weatherStrip");
+      const dot        = document.getElementById("dot");
+      const statusText = document.getElementById("statusText");
+
+      strip.innerHTML = `<span style="font-size:13px;color:#9ca3af;">Loading…</span>`;
+      dot.classList.remove("live");
+      statusText.textContent = "Fetching live data…";
+
+      try {
+        const results = await Promise.all(LOCATIONS.map(l => fetchWeather(l)));
+        strip.innerHTML = "";
+
+        results.forEach((d, i) => {
+          const loc = LOCATIONS[i];
+
+          if (i > 0) {
+            const div = document.createElement("span");
+            div.className = "wx-divider";
+            strip.appendChild(div);
+          }
+
+          const chip = document.createElement("div");
+          chip.className = "city-chip";
+          chip.id = "chip-" + loc.id;
+          chip.setAttribute("role", "button");
+          chip.setAttribute("aria-expanded", "false");
+          chip.onclick = () => {
+            toggleDetails(loc.id);
+            chip.setAttribute("aria-expanded", activeCity === loc.id ? "true" : "false");
+          };
+          chip.innerHTML = `
+            <span class="chip-icon" aria-hidden="true">${d.icon}</span>
+            <span class="chip-city">${loc.city}</span>
+            <span class="chip-temp">${d.temp}°C</span>
+            <span class="chip-cond">${d.condition}</span>
+          `;
+          strip.appendChild(chip);
+          buildDetails(loc.id, d);
+        });
+
+        // Refresh button
+        const btn = document.createElement("button");
+        btn.className = "refresh-btn";
+        btn.title = "Refresh weather";
+        btn.setAttribute("aria-label", "Refresh weather data");
+        btn.innerHTML = "↻";
+        btn.onclick = () => {
+          btn.style.transition = "transform 0.5s";
+          btn.style.transform  = "rotate(360deg)";
+          setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; init(); }, 550);
+        };
+        strip.appendChild(btn);
+
+        // Status bar
+        const now = new Date();
+        dot.classList.add("live");
+        statusText.textContent = `Live data · updated ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")} local time`;
+
+      } catch (err) {
+        strip.innerHTML = `<span style="font-size:13px;color:#ef4444;">Could not load weather — check connection</span>`;
+        statusText.textContent = "Data unavailable";
+        console.error("Weather fetch error:", err);
+      }
+    }
+
+    init();
+  </script>
+
+
+
+
+    <!-- ═══ END SCRIPT FOR WEATHER ═══ -->
+    
     <div class="nav-status"><div class="status-dot"></div>All systems operational</div>
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
       <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
