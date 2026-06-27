@@ -291,6 +291,7 @@ nav {
   border-bottom: 1px solid var(--wx-statusbar-border);
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   font-family: var(--mono);
 }
@@ -313,6 +314,7 @@ nav {
   display: none;
   gap: 2rem;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .details-bar.visible { display: flex; }
