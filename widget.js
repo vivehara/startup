@@ -15,7 +15,7 @@
     // 1. Read global configuration
     const config = window.AIAgentConfig || {
       name: "Aura",
-      role: "Tech Assistant",
+      role: "E-Commerce Assistant",
       emoji: "✨",
       themeColor: "emerald",
       greeting: "Hi! How can I assist you today?",
@@ -208,34 +208,53 @@
         border-top-right-radius: 0;
       }
       .ai-widget-input-form {
-        display: flex;
-        padding: 12px;
-        background: #0f172a;
-        border-top: 1px solid #1e293b;
-        gap: 8px;
+        display: flex !important;
+        padding: 12px !important;
+        background: #0f172a !important;
+        border-top: 1px solid #1e293b !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        align-items: center !important;
       }
       .ai-widget-input {
-        flex: 1;
-        background: #1e293b;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        padding: 8px 12px;
-        color: white;
-        font-size: 13px;
-        outline: none;
+        flex: 1 !important;
+        background-color: #1e293b !important;
+        border: 1.5px solid #334155 !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        color: #ffffff !important;
+        font-size: 14px !important;
+        outline: none !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        display: block !important;
+        line-height: normal !important;
       }
       .ai-widget-input:focus {
-        border-color: ${activeColor};
+        border-color: ${activeColor} !important;
+        background-color: #1a2333 !important;
       }
       .ai-widget-send {
-        background: ${activeColor};
-        border: none;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 13px;
+        background-color: ${activeColor} !important;
+        border: none !important;
+        color: #ffffff !important;
+        padding: 0 16px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        transition: background-color 0.2s !important;
       }
       .ai-widget-send:disabled {
         opacity: 0.5;
