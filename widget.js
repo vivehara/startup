@@ -380,7 +380,35 @@
         } else {
           const serverErr = result.error || "Unknown server error";
           console.error("Aether AI API Error:", serverErr);
-          appendMessage("assistant", `Sorry, I am having trouble connecting right now. Server Error: ${serverErr}`);
+          
+          let friendlyMsg = "Sorry, I am having trouble connecting right now. Please verify API configuration.";
+          let errObj = null;
+          
+          if (typeof serverErr === "object") {
+            errObj = serverErr;
+          } else if (typeof serverErr === "string") {
+            try {
+              errObj = JSON.parse(serverErr);
+            } catch (e) {
+              // Not JSON string
+            }
+          }
+          
+          const errMsg = errObj?.message || (typeof serverErr === "string" ? serverErr : "");
+          const isQuota = errMsg.includes("quota") || 
+                          errMsg.includes("RESOURCE_EXHAUSTED") || 
+                          errObj?.code === 429 || 
+                          errObj?.status === "RESOURCE_EXHAUSTED";
+          
+          if (isQuota) {
+            friendlyMsg = "We are currently experiencing very high volume! My temporary free-tier API limits have been reached. Please try again in a few minutes, or verify your billing setup in Google AI Studio.";
+          } else if (errMsg) {
+            friendlyMsg = `Sorry, I am having trouble connecting right now. (Error: ${errMsg})`;
+          } else {
+            friendlyMsg = `Sorry, I am having trouble connecting right now. (Status: ${response.status})`;
+          }
+          
+          appendMessage("assistant", friendlyMsg);
         }
       } catch (err) {
         loadingIndicator.style.display = "none";
