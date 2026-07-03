@@ -346,6 +346,8 @@
 
       try {
         const apiPath = (config.backendUrl || "").replace(/\/$/, "") + "/api/agent/chat";
+        console.log("Aether AI: Sending request to", apiPath);
+        
         const response = await fetch(apiPath, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -359,18 +361,38 @@
           })
         });
 
-        const result = await response.json();
+        const contentType = response.headers.get("content-type") || "";
+        let result;
+        
+        if (contentType.includes("application/json")) {
+          result = await response.json();
+        } else {
+          const rawText = await response.text();
+          console.error("Aether AI Error: Server returned non-JSON response. Content-Type:", contentType, "Response:", rawText);
+          throw new Error("Server returned an invalid (non-JSON) response. This usually means the server is starting up or has crashed.");
+        }
+
         loadingIndicator.style.display = "none";
 
         if (response.ok && result.text) {
           chatHistory.push({ role: "assistant", content: result.text });
           appendMessage("assistant", result.text);
         } else {
-          appendMessage("assistant", "Sorry, I am having trouble connecting right now. Please verify API configuration.");
+          const serverErr = result.error || "Unknown server error";
+          console.error("Aether AI API Error:", serverErr);
+          appendMessage("assistant", `Sorry, I am having trouble connecting right now. Server Error: ${serverErr}`);
         }
       } catch (err) {
         loadingIndicator.style.display = "none";
-        appendMessage("assistant", "Sorry, a communication error occurred. Check server logs.");
+        console.error("Aether AI Communication Error:", err);
+        console.warn(
+          "💡 Troubleshooting steps for communication error:\n" +
+          "1. Check that your 'backendUrl' in your website's HTML is set to your actual Render URL (e.g. 'https://vivehara-chatbot-backend.onrender.com') and not a placeholder.\n" +
+          "2. Check if Render is currently in a 'cold start' (it goes to sleep after 15 mins of inactivity on the free tier and takes ~1-2 mins to wake up on the first request).\n" +
+          "3. Verify you have set the GEMINI_API_KEY environment variable in your Render Web Service dashboard under 'Environment'.\n" +
+          "4. Check the Render service logs for any crash reports or errors."
+        );
+        appendMessage("assistant", "Sorry, a communication error occurred. The server may be waking up (cold start) or starting up. Please check your browser console (press F12) or server logs.");
       } finally {
         input.disabled = false;
         input.focus();
