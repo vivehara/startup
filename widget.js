@@ -15,7 +15,7 @@
     // 1. Read global configuration
     const config = window.AIAgentConfig || {
       name: "Aura",
-      role: "E-Commerce Assistant",
+      role: "Tech Assistant",
       emoji: "✨",
       themeColor: "emerald",
       greeting: "Hi! How can I assist you today?",
