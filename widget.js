@@ -380,10 +380,10 @@
 
     function appendMessage(role, text) {
       const msgDiv = document.createElement("div");
-      msgDiv.className = `ai-message \${role}`;
+      msgDiv.className = `ai-message ${role}`;
       msgDiv.innerHTML = `
-        <div class="ai-msg-avatar">\${role === 'user' ? '👤' : config.emoji}</div>
-        <div class="ai-msg-text">\${text}</div>
+        <div class="ai-msg-avatar">${role === 'user' ? '👤' : config.emoji}</div>
+        <div class="ai-msg-text">${text}</div>
       `;
       // Insert before the loader indicator
       messagesContainer.insertBefore(msgDiv, loadingIndicator);
