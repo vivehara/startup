@@ -1042,7 +1042,8 @@ tbody td:last-child { text-align: right; font-weight: 500; font-size: 16px; padd
   position: fixed;
   top: 130px;
   right: 24px;
-  width: 260px;
+  width: 780px;
+  max-width: calc(100vw - 48px);
   z-index: 300;
   border-radius: 14px;
   overflow: hidden;
@@ -1133,10 +1134,14 @@ tbody td:last-child { text-align: right; font-weight: 500; font-size: 16px; padd
   100%    { opacity: 0; transform: scale(0.88); filter: brightness(1.15); }
 }
 
+@media (max-width: 900px) {
+  .ad-popup { width: 420px; top: 16px; }
+}
+
 @media (max-width: 640px) {
-  .ad-popup { width: 190px; top: auto; bottom: 16px; right: 16px; }
+  .ad-popup { width: 100%; max-width: calc(100vw - 32px); top: auto; bottom: 16px; right: 16px; left: 16px; }
 }
 
 @media (max-width: 400px) {
-  .ad-popup { width: 150px; }
+  .ad-popup { width: 100%; }
 }
