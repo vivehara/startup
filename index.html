@@ -56,6 +56,13 @@
 <div class="details-bar" id="details-raleigh"></div>
 <div class="details-bar" id="details-chennai"></div>
 
+<!-- ===================== AD POPUP (solar power ad) ===================== -->
+<div class="ad-popup" id="ad-popup">
+  <button class="ad-popup-close" id="ad-popup-close" type="button" aria-label="Close advertisement">×</button>
+  <img src="images/solar_park.jpeg" alt="Solar power advertisement">
+  <div class="ad-popup-label">Sponsored</div>
+</div>
+
 <div class="hero">
 
   <div class="hero-content">
@@ -525,6 +532,17 @@
     alert("Thanks! We'll be in touch within 24 hours.");
     document.getElementById('email-input').value = '';
   }
+</script>
+
+<!-- ===================== AD POPUP behavior: close with glitter, then fade ===================== -->
+<script>
+  document.getElementById('ad-popup-close').addEventListener('click', () => {
+    const popup = document.getElementById('ad-popup');
+    popup.classList.add('closing');
+    popup.addEventListener('animationend', () => {
+      popup.style.display = 'none';
+    }, { once: true });
+  });
 </script>
 
 <!-- The Chatbot Anchor Node -->
