@@ -1041,11 +1041,11 @@ tbody td:last-child { text-align: right; font-weight: 500; font-size: 16px; padd
 .ad-popup {
   position: fixed;
   top: 130px;
-  right: 24px;
-  width: 780px;
+  right: 25px;
+  width: 800px;
   max-width: calc(100vw - 48px);
   z-index: 300;
-  border-radius: 14px;
+  border-radius: 15px;
   overflow: hidden;
   background: var(--white);
   border: 1px solid var(--border);
