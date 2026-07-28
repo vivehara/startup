@@ -677,7 +677,10 @@ section.section-bg    { background: var(--bg); }
 .team-card:hover { border-color: var(--blue-mid); box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
 .t-avatar {
+  width: 140px;       /* match your height */
   height: 140px;
+  margin: 0 auto;      /* center it in the card if card is wider */
+  border-radius: 50%;  /* remove this line if you want square avatars, not circles */
   display: flex;
   align-items: center;
   justify-content: center;
